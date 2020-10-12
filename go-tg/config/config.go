@@ -19,6 +19,7 @@ var Logging bool
 var TelegramToken string
 
 var ParseIntervalInSeconds int
+var ManualCheckCooldownInMinutes int
 
 func init() {
 	err := godotenv.Load("config.env")
@@ -41,6 +42,14 @@ func init() {
 	}
 
 	ParseIntervalInSeconds, err = strconv.Atoi(os.Getenv("PARSE_INTERVAL_IN_SECONDS"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	ParseIntervalInSeconds, err = strconv.Atoi(os.Getenv("PARSE_INTERVAL_IN_SECONDS"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	ManualCheckCooldownInMinutes, err = strconv.Atoi(os.Getenv("MANUAL_CHECK_COOLDOWN_IN_MINUTES"))
 	if err != nil {
 		log.Fatal(err)
 	}

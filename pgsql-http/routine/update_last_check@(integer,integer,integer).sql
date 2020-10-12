@@ -9,9 +9,9 @@ BEGIN
 		WHERE user_id = user_id_in
 		  AND good_id = good_id_in;
 
-	UPDATE good
-	SET price = price_in
-		WHERE id = good_id_in;
+-- 	UPDATE good
+-- 	SET price = price_in
+-- 		WHERE id = good_id_in;
 END
 $$;
 

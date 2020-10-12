@@ -1,4 +1,4 @@
-CREATE FUNCTION manual_check_validation(user_id_in integer, good_id_in integer, cooldown_in_minutes integer) RETURNS character varying
+CREATE FUNCTION manual_check_validation(user_id_in integer, good_id_in integer, cooldown_in_minutes integer) RETURNS TABLE(exists bool, url VARCHAR, old_price VARCHAR)
 	LANGUAGE plpgsql
 AS
 $$

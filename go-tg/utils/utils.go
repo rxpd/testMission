@@ -35,7 +35,6 @@ func GetTextFromCommand(command string, text string) string {
 }
 
 func SuccessfullySubscribedFormat(title, url, price string) string {
-	//"Теперь я слежу за ценой [title](url), на данный момент она составляет - price ₽."
 	result := rxtypes.SuccessfullySubscribed
 	result = strings.Replace(result, "title", title, 1)
 	result = strings.Replace(result, "url", url, 1)
@@ -43,8 +42,16 @@ func SuccessfullySubscribedFormat(title, url, price string) string {
 	return result
 }
 
+func SuccessfulUnsubscribedFormat(title, url, price string) string {
+	result := rxtypes.SuccessfulUnsubscribed
+	result = strings.Replace(result, "title", title, 1)
+	result = strings.Replace(result, "url", url, 1)
+	result = strings.Replace(result, "price", price, 1)
+	return result
+}
+
 func PriceChangeFormat(title, url, oldPrice, newPrice string) string {
-	//"Теперь я слежу за ценой [title](url), на данный момент она составляет - price ₽."
+	//"Цена на [title](url) изменилась, с *oldPrice* на *newPrice ₽*."
 	result := rxtypes.PriceChanged
 	result = strings.Replace(result, "title", title, 1)
 	result = strings.Replace(result, "url", url, 1)
@@ -53,6 +60,22 @@ func PriceChangeFormat(title, url, oldPrice, newPrice string) string {
 	return result
 }
 
+func PriceDoesNotChangeFormat(title, url, price string) string {
+	//Цена на [title](url) не изменилась. Последня цена - *price ₽*.
+	result := rxtypes.PriceDoesNotChanged
+	result = strings.Replace(result, "title", title, 1)
+	result = strings.Replace(result, "url", url, 1)
+	result = strings.Replace(result, "price", price, 1)
+	return result
+}
+func CooldownLimitFormatter(title, url, price string) string {
+	//Слишком часто проверяешь, подожди. Последня цена на [title](url) - *price ₽*."
+	result := rxtypes.CooldownLimit
+	result = strings.Replace(result, "title", title, 1)
+	result = strings.Replace(result, "url", url, 1)
+	result = strings.Replace(result, "price", price, 1)
+	return result
+}
 func PriceBeautify(price string) string {
 	var result string
 	for i := len(price); i > 0; i-- {

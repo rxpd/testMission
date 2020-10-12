@@ -5,6 +5,7 @@ $$
 BEGIN
 	UPDATE good_user
 	SET price=price_in
+	  , last_check =now()
 		WHERE good_id = good_id_in;
 
 	UPDATE good

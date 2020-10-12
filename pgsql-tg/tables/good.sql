@@ -5,7 +5,8 @@ CREATE TABLE good
 		CONSTRAINT good_pk
 			PRIMARY KEY,
 	url   VARCHAR NOT NULL,
-	price INTEGER NOT NULL
+	price INTEGER NOT NULL,
+	title VARCHAR
 );
 
 ALTER TABLE good
