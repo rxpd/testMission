@@ -196,37 +196,31 @@ type GoodManualChecked struct {
 ```go
 	lastUserCommand := map[int64]string{} // [chatID]lastCommand
 ```
-Кстати насчет `chatID`, возможно стоило использовать его как `PrimaryKey`, для таблицы `users`, так как внутренним `id` я так и не пользовался, а делал лишние подзапросы, типа `user_id = (SELECT id FROM users WHERE chat_id = chat_id_in);`.
+Теперь в качестве `PrimaryKey` для сущности `tg_user` выступает не внутренний `ID`, а `chatID`, который уникален и постоянен для каждого телеграмм-пользователя.
+Это дает возможность избежать постоянного использования одинаковых подзапросов, типа `user_id = (SELECT id FROM users WHERE chat_id = chat_id_in);`.
 
 Поскольку в телеграмм версии много ответов, сделал вот такую штуку для удобства:
 ```go
-package rxtypes
+package messageFormater
 
 const (
-	// tg
-	MsgInternalServerError          = "500 HTTP код, свяжитесь с разработчиком - @cbrrrrrrrrr."
-	MsgForNewUser                   = "Привет name! Пришли мне ссылку на объявление и я буду за ним следить, если цена поменяется я сообщу тебе. Также ты можешь вручную проверять цену."
-	SubscribeCommandHelp            = "Отправьте ссылку на объявление."
-	UnsubscribeCommandHelp          = "Выбери объявление."
-	DoesNotUnderstand               = "Я тебя вообще не понял. Введи /help."
-	SuccessfullySubscribed          = "Теперь я слежу за ценой [title](url), на данный момент она составляет - *price ₽*."
-	MsgInternalServerErrorOrNotFund = "Либо на сервере что-то не так, либо ты ввел не существующе объявление."
-	AlreadySubscribed               = "Ты уже подписан на это объявление. Как только что-то поменяется - я сообщу."
-	Successfully                    = "Успешно."
-	PriceChanged                    = "Цена на [title](url) изменилась, с *oldPrice* на *newPrice ₽*."
-	ChoseSubscribe                  = "Выбери подписку:"
-	SuccessfulUnsubscribed          = "Теперь я не не слежу за [title](url). Последня цена - *price ₽*."
-	CommandCanceled                 = "Команда отменена."
-	PriceDoesNotChanged             = "Цена на [title](url) не изменилась. Последня цена - *price ₽*."
-	CooldownLimit                   = "Слишком часто проверяешь, подожди. Последня цена на [title](url) - *price ₽*."
-
-	CmdSubscribe   = "subscribe"
-	CmdUnsubscribe = "unsubscribe"
-	CmdManualCheck = "check_price"
-	CmdCancel      = "cancel"
-
-	// other
-	EmptyString = ""
+	InternalServerError    = "500 HTTP код, свяжись с разработчиком - [rxpd](https://github.com/rxpd)"
+	NewUserGreeting        = "Привет name! Пришли мне ссылку на объявление и я буду за ним следить, если цена поменяется я сообщу тебе. Также ты можешь вручную проверять цену. Используй */subscribe*"
+	SubscribeCommandHelp   = "Отправь ссылку на объявление."
+	UnsubscribeCommandHelp = "Выбери объявление."
+	SuccessfullySubscribed = "Теперь я слежу за ценой [title](url), на данный момент она составляет - *price ₽*."
+	GoodNotFound           = "Я не нашел объявление. Проверь ссылку или разработчиком - [rxpd](https://github.com/rxpd)."
+	AlreadySubscribed      = "Ты уже подписан на это объявление. Как только что-то поменяется - я сообщу."
+	Successfully           = "Успешно."
+	PriceChanged           = "Цена на [title](url) изменилась, с *oldPrice* на *newPrice ₽*."
+	ChoseSubscribe         = "Выбери подписку:"
+	SuccessfulUnsubscribed = "Теперь я не не слежу за [title](url). Последня цена - *price ₽*."
+	CommandCanceled        = "Команда отменена."
+	PriceDoesNotChanged    = "Цена на [title](url) не изменилась. Последня цена - *price ₽*."
+	CooldownLimit          = "Слишком часто проверяешь, подожди. Последня цена на [title](url) - *price ₽*."
+	NoSubscribes           = "У тебя нет подписок."
+	DoesNotUnderstand      = "Я тебя вообще не понял. Введи /help."
+	Help                   = "Помощь."
 )
 ```
 потом просто через `strings.Replace()` меняю алиасы, например:
@@ -239,7 +233,43 @@ func SuccessfullySubscribedFormat(title, url, price string) string {
 	return result
 }
 ```
-Все сообщения отправляются через `messageController`. Для каждого варианта сообщения(обычное сообщение, клавитура, сообщения в markdown формате) своя функция.
+
+Так же есть свои пакеты для команд пользователя и ответов базы данных:
+```go
+package commands
+
+const (
+	Start       = "start"
+	Subscribe   = "subscribe"
+	ManualCheck = "manual_check"
+	Unsubscribe = "unsubscribe"
+	Help        = "help"
+	Cancel      = "cancel"
+)
+}
+```
+
+```go
+package DBResponses
+
+const (
+	UserExists             = "user exists"
+	NewUser                = "new user"
+	SubscribeAlreadyExists = "this subscribe already in database"
+	Ok                     = "ok"
+)
+```
+
+Не смотря, что под такое маленькое количество переменных создается свой пакет, это реально удобно и код легче читается:
+```go
+// ...
+switch lastUserCommand[int64(update.CallbackQuery.From.ID)] {
+			case cmd.Unsubscribe: // <-- удобно же
+				// ...
+}
+```
+Все сообщения отправляются через `messageController`. Для каждого варианта сообщения(обычное сообщение, клавиатура, сообщения в markdown формате) своя функция.
+`coreController` является промежуточным звеном между `main.go` и `messageController`. `coreController`, общается с базой данных и возвращает данные, в зависимости от которых блок кода из `main.go` принимает решение какое сообщение отправлять или отправлять ли вообще. 
 
 
 #### Схема базы данных

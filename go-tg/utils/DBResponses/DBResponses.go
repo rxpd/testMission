@@ -1,4 +1,4 @@
-package dbResponses
+package DBResponses
 
 const (
 	UserExists             = "user exists"

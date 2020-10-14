@@ -1,10 +1,10 @@
 package main
 
 import (
-	"avitoTelegram/DBModule"
 	"avitoTelegram/config"
 	"avitoTelegram/utils"
 	"avitoTelegram/utils/logger"
+	msgFormater "avitoTelegram/utils/messageFormater"
 	"errors"
 	"fmt"
 	tgapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -12,6 +12,8 @@ import (
 	"strconv"
 	"time"
 )
+
+var wd selenium.WebDriver
 
 func checkPriceByURL(url string) (int, string, error) {
 
@@ -76,11 +78,10 @@ func checkPageExists(title string) bool {
 }
 
 func startPriceChecker() {
-	DB := DBModule.GetDB()
 	t := time.NewTicker(time.Second * time.Duration(config.ParseIntervalInSeconds))
 	for {
 		var urlsForParse []GoodsForCheck
-		query := `select * from urls_for_parse_select();`
+		query := `select * from select_urls_for_parse();`
 		err := DB.Select(&urlsForParse, query)
 		logger.LogErrorIf(err)
 
@@ -92,7 +93,7 @@ func startPriceChecker() {
 			logger.LogErrorIf(err)
 			if checkedPrice != good.Price {
 				var usersForNotify []int64
-				query := `select * from get_users_for_notify(good_id_in := $1, price_in := $2);`
+				query := `select * from select_users_for_notify(good_id_in := $1, price_in := $2);`
 				err := DB.Select(&usersForNotify, query, good.GoodID, checkedPrice)
 				if len(usersForNotify) == 0 {
 					continue
@@ -103,7 +104,7 @@ func startPriceChecker() {
 				oldPriceFormatted := utils.PriceBeautify(strconv.Itoa(good.Price))
 				//fmt.Println(usersForNotify, checkedPriceFormatted, oldPriceFormatted, good.URL, title)
 				//err = SendNotifyEmail(usersForNotify, checkedPriceFormatted, oldPriceFormatted, good.URL, title)
-				message := utils.PriceChangeFormat(title, good.URL, oldPriceFormatted, checkedPriceFormatted)
+				message := msgFormater.PriceChangedFormat(title, good.URL, oldPriceFormatted, checkedPriceFormatted)
 				priceUpdateMessage(usersForNotify, message)
 				query = `select update_price(good_id_in := $1, price_in := $2);`
 				_, err = DB.Exec(query, good.GoodID, checkedPrice)

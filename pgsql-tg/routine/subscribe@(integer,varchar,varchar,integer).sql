@@ -4,13 +4,13 @@ AS
 $$
 DECLARE
 	good_id_vr       INTEGER;
-	user_id_vr       INTEGER;
+-- 	user_id_vr       INTEGER;
 	response_message VARCHAR;
 BEGIN
 	response_message = 'ok';
 	good_id_vr = (SELECT id FROM good WHERE url = good_url_in); -- заполняю переменные
-	user_id_vr = (SELECT id FROM users WHERE chat_id = chat_id_in); -- заполняю переменные
-	IF exists(SELECT FROM good_user WHERE good_user.good_id = good_id_vr AND good_user.user_id = user_id_vr) THEN
+-- 	user_id_vr = (SELECT chat_id FROM tg_user WHERE chat_id = chat_id_in); -- заполняю переменные
+	IF exists(SELECT FROM good_user WHERE good_user.good_id = good_id_vr AND good_user.user_id = chat_id_in) THEN
 		RETURN 'this subscribe already in database';
 	END IF;
 	IF good_id_vr ISNULL THEN
@@ -26,7 +26,7 @@ BEGIN
 		INTO good_user
 			(good_id, user_id, price, last_check)
 		VALUES
-			(good_id_vr, user_id_vr, price_in, DEFAULT);
+			(good_id_vr, chat_id_in, price_in, DEFAULT);
 	RETURN response_message;
 END
 $$;

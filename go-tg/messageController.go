@@ -21,13 +21,13 @@ func sendMessage(chatID int64, message string, update tgapi.Update) {
 	logger.LogErrorIf(err)
 }
 
-func sendCallbackMessage(chatID int, message string) /*, update tgapi.Update)*/ {
+func sendCallbackMessage(chatID int, message string) {
 	msg := tgapi.NewMessage(int64(chatID), message)
 	_, err := bot.Send(msg)
 	logger.LogErrorIf(err)
 }
 
-func sendCallbackMarkdownMessage(chatID int, message string) /*, update tgapi.Update)*/ {
+func sendCallbackMarkdownMessage(chatID int, message string) {
 	msg := tgapi.NewMessage(int64(chatID), message)
 	msg.ParseMode = "Markdown"
 	_, err := bot.Send(msg)

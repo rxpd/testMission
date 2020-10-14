@@ -4,9 +4,9 @@ CREATE TABLE good
 	id    SERIAL  NOT NULL
 		CONSTRAINT good_pk
 			PRIMARY KEY,
-	url   VARCHAR NOT NULL,
+	url   TEXT    NOT NULL,
 	price INTEGER NOT NULL,
-	title VARCHAR
+	title TEXT
 );
 
 ALTER TABLE good

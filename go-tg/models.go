@@ -20,12 +20,12 @@ type GoodInfo struct {
 	Price int    `db:"price_u"`
 }
 
-type ManualCheckPriceResponse struct {
-	Message string `db:"message"`
-	URL     string `db:"url_a"`
-	//GoodID   int    `db:"good_id"`
-	OldPrice int `db:"old_price"`
-}
+//type ManualCheckPriceResponse struct {
+//	Message string `db:"message"`
+//	URL     string `db:"url_a"`
+//	//GoodID   int    `db:"good_id"`
+//	OldPrice int `db:"old_price"`
+//}
 
 type UserManualCheck struct {
 	ChatID     int

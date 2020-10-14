@@ -6,12 +6,9 @@ BEGIN
 	UPDATE good_user
 	SET last_check= now()
 	  , price=price_in
-		WHERE user_id = (SELECT id FROM users WHERE chat_id = chat_id_in)
+		WHERE user_id = chat_id_in
 		  AND good_id = good_id_in;
 
-	-- 	UPDATE good
--- 	SET price = price_in
--- 		WHERE id = good_id_in;
 END
 $$;
 
